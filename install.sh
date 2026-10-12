@@ -34,15 +34,23 @@ ok()      { printf '  ✓ %s\n' "$1"; }
 hinweis() { printf '  → %s\n' "$1"; }
 abbruch() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
-# Ja/Nein-Frage, Enter = ja. Bei `curl … | bash` kommt das Skript über die
-# normale Eingabe — die Antwort wird deshalb direkt vom Terminal gelesen.
+# Ja/Nein-Frage: ein einzelner Tastendruck genügt — j oder Enter = ja, n = nein
+# (ohne zusätzliches Enter). Bei `curl … | bash` kommt das Skript über die
+# normale Eingabe — die Taste wird deshalb direkt vom Terminal gelesen.
 # Gibt es kein Terminal (z. B. in einem anderen Skript), gilt „nein“.
 fragen() {
   [ -n "${ZEIT_JA:-}" ] && return 0
-  local antwort
-  printf '  ? %s [J/n] ' "$1"
-  if ! { read -r antwort </dev/tty; } 2>/dev/null; then echo; return 1; fi
-  case "$antwort" in ""|j|J|ja|Ja|y|Y|yes) return 0 ;; *) return 1 ;; esac
+  local taste
+  printf '  ? %s  [j = ja / n = nein] ' "$1"
+  while true; do
+    # -n 1: nur ein Zeichen, -s: nicht anzeigen (wir schreiben die Antwort selbst hin)
+    if ! { IFS= read -r -s -n 1 taste </dev/tty; } 2>/dev/null; then echo; return 1; fi
+    case "$taste" in
+      ""|j|J|y|Y) echo "ja";   return 0 ;;
+      n|N)        echo "nein"; return 1 ;;
+      *) ;;                       # andere Tasten: einfach weiter warten
+    esac
+  done
 }
 
 # --- 1. Voraussetzungen -------------------------------------------------------
