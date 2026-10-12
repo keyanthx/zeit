@@ -126,7 +126,23 @@ fi
 printf '\n\033[1;32m✓ zeit ist bereit.\033[0m\n\n'
 echo "  zeit                 Oberfläche im Terminal öffnen"
 echo "  zeit start <projekt> <phase>   Timer starten (legt Neues nach Rückfrage an)"
+echo "  zeit tutorial        die geführte Tour (noch einmal) starten"
 echo "  zeit --help          alle Befehle"
 echo
 echo "  Aktualisieren: dieses Skript erneut ausführen."
 echo "  Entfernen:     $ZIEL/uninstall.sh"
+
+# --- Beim ersten Mal: gleich mit dem Tutorial starten ---------------------------
+# „Erstes Mal“ heißt: Das Tutorial wurde noch nie abgeschlossen. Bei einem
+# Update passiert hier also nichts. ZEIT_NICHT_STARTEN=1 schaltet das ab.
+# Bei `curl … | bash` ist die Tastatur nicht die Standardeingabe (dort kommt
+# das Skript an) — deshalb liest das TUI ausdrücklich vom Terminal /dev/tty.
+config="$HOME/.config/zeit/projekte.md"
+if [ -z "${ZEIT_NICHT_STARTEN:-}" ] && ! grep -qs '^- tutorial: fertig' "$config" \
+   && { exec 3</dev/tty; } 2>/dev/null; then
+  exec 3<&-
+  echo
+  echo "  Gleich startet das Tutorial (Esc beendet es jederzeit) …"
+  sleep 2
+  "$ZIEL/zeit.py" tutorial </dev/tty >/dev/tty 2>&1 || true
+fi

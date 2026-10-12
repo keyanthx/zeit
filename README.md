@@ -22,6 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/keyanthx/zeit/main/install.sh | bas
 
 Das Skript lädt zeit nach `~/.local/share/zeit`, richtet den Befehl `zeit` ein
 und — falls [SwiftBar](https://swiftbar.app) installiert ist — die Menüleiste.
+Bei der ersten Installation öffnet sich danach gleich das Tutorial.
 Lieber selbst? Dann so:
 
 ```bash

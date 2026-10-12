@@ -24,7 +24,8 @@ curl -fsSL https://raw.githubusercontent.com/keyanthx/zeit/main/install.sh | bas
 
 This downloads zeit to `~/.local/share/zeit`, sets up the `zeit` command in
 `~/.local/bin` (adding it to your PATH if needed) and, if
-[SwiftBar](https://swiftbar.app) is installed, the menu bar plugin.
+[SwiftBar](https://swiftbar.app) is installed, the menu bar plugin. On a first
+install it then opens zeit right away and starts the tutorial.
 
 Prefer to do it yourself?
 
