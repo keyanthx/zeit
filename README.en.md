@@ -13,6 +13,18 @@ Python's standard library.
 > *(zeit is German for "time".)* The commands are short and the
 > [German README](README.md) has every detail.
 
+## Step by step (no terminal experience needed)
+
+1. **Open Terminal:** press **⌘ + Space**, type `Terminal`, press **Enter**.
+2. **Paste this line (⌘ + V) and press Enter:**
+   `curl -fsSL https://raw.githubusercontent.com/keyanthx/zeit/main/install.sh | bash`
+
+That's it. The script checks what's missing and asks before installing it
+(**Enter** = yes): Apple's command line tools (they include Python — click
+**Install** in the window that appears, the script waits) and, optionally,
+SwiftBar for the menu bar (downloaded from its official GitHub page, no password
+needed). Then the tutorial starts and ⏱ appears in the menu bar.
+
 ## Install
 
 Requirements: **macOS** and **Python 3.9+**. Python comes with Apple's command
@@ -37,8 +49,8 @@ cd zeit && ./install.sh
 **Update:** run the install script again. **Uninstall:**
 `~/.local/share/zeit/uninstall.sh` — your data is kept.
 
-**Menu bar (optional):** `brew install --cask swiftbar`, open SwiftBar once and
-choose a plugin folder, then run `install.sh` again.
+**Menu bar (optional):** if SwiftBar is missing, the install script offers to
+install it and sets up the plugin folder `~/SwiftBar`.
 
 ## First steps
 

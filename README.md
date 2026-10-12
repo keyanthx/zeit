@@ -11,6 +11,29 @@ außer Python (nur Standardbibliothek).
 
 *[English README](README.en.md)*
 
+## Installation Schritt für Schritt (ohne Vorkenntnisse)
+
+**1. Terminal öffnen:** **⌘ + Leertaste** drücken, `Terminal` tippen, **Enter**.
+
+**2. Diese Zeile kopieren, ins Terminal einfügen (⌘ + V) und Enter drücken:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/keyanthx/zeit/main/install.sh | bash
+```
+
+Das war's. Das Skript schaut nach, was auf deinem Mac fehlt, und fragt jeweils,
+ob es das installieren darf (**Enter** = ja):
+
+- **Apples Entwicklerwerkzeuge** (bringen Python mit) — es öffnet sich ein
+  Fenster, dort auf **Installieren** klicken; das Skript wartet und macht dann
+  weiter.
+- **SwiftBar** für die Menüleiste (optional) — wird direkt von der offiziellen
+  GitHub-Seite geladen, ohne Passwort.
+
+Danach startet automatisch das **Tutorial**, und oben in der Menüleiste
+erscheint ⏱. **Später wieder öffnen:** Terminal öffnen, `zeit` tippen, Enter —
+oder auf ⏱ klicken.
+
 ## Installation
 
 Voraussetzungen: **macOS** und **Python 3.9 oder neuer**. Python bringt macOS mit
@@ -45,8 +68,8 @@ zeit stop                          # stoppt und trägt ein
 zeit                               # Oberfläche im Terminal
 ```
 
-Die Menüleiste ist optional: `brew install --cask swiftbar`, SwiftBar einmal
-öffnen und einen Plugin-Ordner wählen, dann `install.sh` erneut ausführen.
+Die Menüleiste ist optional: Fehlt SwiftBar, bietet das Install-Skript an, es
+mitzuinstallieren (und richtet den Plugin-Ordner `~/SwiftBar` ein).
 
 **Deine Daten** liegen nur bei dir: welche Projekte es gibt und deine
 Einstellungen in `~/.config/zeit/projekte.md`, die Zeiten selbst in einer

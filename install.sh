@@ -7,12 +7,17 @@
 # oder aus einem geklonten Repo heraus:   ./install.sh
 #
 # Was passiert:
-#   1. Prüfen: macOS, Python 3.9 oder neuer
+#   1. Prüfen: macOS, Python 3.9 oder neuer. Fehlen Apples Entwicklerwerkzeuge
+#      (sie bringen Python mit), bietet das Skript an, sie zu installieren.
 #   2. zeit nach ~/.local/share/zeit laden (bzw. dort aktualisieren).
 #      Aus einem geklonten Repo heraus bleibt zeit, wo es ist.
 #   3. Den Befehl `zeit` einrichten: ~/.local/bin/zeit (eine Verknüpfung)
 #   4. Falls nötig ~/.local/bin in den PATH deiner Shell eintragen
-#   5. Falls SwiftBar installiert ist: die Menüleiste einrichten
+#   5. Menüleiste: SwiftBar — fehlt es, bietet das Skript an, es von
+#      github.com/swiftbar zu laden; dann den Plugin-Ordner einrichten
+#
+# Vor jeder Installation fragt das Skript nach (Enter = ja). ZEIT_JA=1
+# beantwortet alle Fragen mit Ja.
 #
 # Deine Daten (~/.config/zeit/ und die Zeiterfassung.md in deinen Projekt-
 # ordnern) fasst das Skript nie an. Erneut ausführen = aktualisieren.
@@ -29,6 +34,17 @@ ok()      { printf '  ✓ %s\n' "$1"; }
 hinweis() { printf '  → %s\n' "$1"; }
 abbruch() { printf '\n\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
+# Ja/Nein-Frage, Enter = ja. Bei `curl … | bash` kommt das Skript über die
+# normale Eingabe — die Antwort wird deshalb direkt vom Terminal gelesen.
+# Gibt es kein Terminal (z. B. in einem anderen Skript), gilt „nein“.
+fragen() {
+  [ -n "${ZEIT_JA:-}" ] && return 0
+  local antwort
+  printf '  ? %s [J/n] ' "$1"
+  if ! { read -r antwort </dev/tty; } 2>/dev/null; then echo; return 1; fi
+  case "$antwort" in ""|j|J|ja|Ja|y|Y|yes) return 0 ;; *) return 1 ;; esac
+}
+
 # --- 1. Voraussetzungen -------------------------------------------------------
 schritt "Voraussetzungen prüfen"
 [ "$(uname)" = "Darwin" ] || abbruch "zeit läuft nur auf macOS (es nutzt Kalender, Mitteilungen und Fenster von macOS)."
@@ -36,8 +52,21 @@ schritt "Voraussetzungen prüfen"
 # Auf einem frischen Mac ist /usr/bin/python3 nur ein Platzhalter, der die
 # Entwicklerwerkzeuge nachinstallieren will. Darum zuerst danach schauen.
 if ! command -v python3 >/dev/null 2>&1 || { [ "$(command -v python3)" = "/usr/bin/python3" ] && ! xcode-select -p >/dev/null 2>&1; }; then
-  abbruch "Python 3 fehlt. Installiere es mit:  xcode-select --install
-  (das sind Apples Entwicklerwerkzeuge, sie bringen Python mit) — danach dieses Skript erneut starten."
+  hinweis "Apples Entwicklerwerkzeuge fehlen noch — sie bringen Python mit, das zeit braucht."
+  fragen "Jetzt installieren? (ein paar Minuten, ca. 1 GB)" \
+    || abbruch "Ohne Python geht es nicht. Später einfach dieses Skript erneut starten."
+  xcode-select --install >/dev/null 2>&1 || true
+  hinweis "Es öffnet sich ein Fenster: dort auf „Installieren“ klicken."
+  printf '  … warte auf die Installation '
+  # Fertig ist sie, sobald xcode-select einen Ordner kennt (höchstens 1 Stunde)
+  for _ in $(seq 1 720); do
+    xcode-select -p >/dev/null 2>&1 && break
+    printf '.'; sleep 5
+  done
+  echo
+  xcode-select -p >/dev/null 2>&1 \
+    || abbruch "Die Entwicklerwerkzeuge sind noch nicht da. Wenn die Installation fertig ist, dieses Skript erneut starten."
+  ok "Entwicklerwerkzeuge installiert"
 fi
 python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)' \
   || abbruch "zeit braucht Python 3.9 oder neuer (gefunden: $(python3 --version 2>&1))."
@@ -97,7 +126,54 @@ esac
 
 # --- 5. Menüleiste (optional, mit SwiftBar) ----------------------------------
 schritt "Menüleiste (SwiftBar)"
-if [ -d "/Applications/SwiftBar.app" ] || [ -d "$HOME/Applications/SwiftBar.app" ]; then
+# ZEIT_PROGRAMME: anderer Programme-Ordner (nur für Tests)
+PROGRAMME="${ZEIT_PROGRAMME:-/Applications}"
+swiftbar_app() {
+  for a in "$PROGRAMME/SwiftBar.app" "$HOME/Applications/SwiftBar.app"; do
+    [ -d "$a" ] && { echo "$a"; return 0; }
+  done
+  return 1
+}
+
+# SwiftBar fehlt? Die neueste Version von der offiziellen GitHub-Seite laden.
+if ! swiftbar_app >/dev/null; then
+  hinweis "SwiftBar fehlt — damit erscheint zeit oben in der Menüleiste (optional)."
+  if fragen "SwiftBar jetzt installieren? (ca. 3 MB von github.com/swiftbar)"; then
+    url="$(curl -fsSL https://api.github.com/repos/swiftbar/SwiftBar/releases/latest | python3 -c '
+import json, sys
+for a in json.load(sys.stdin)["assets"]:
+    if a["name"].endswith(".zip"):
+        print(a["browser_download_url"]); break')" || url=""
+    if [ -n "$url" ]; then
+      tmp="$(mktemp -d)"
+      curl -fsSL "$url" -o "$tmp/SwiftBar.zip" && ditto -x -k "$tmp/SwiftBar.zip" "$tmp"
+      ziel_ordner="$PROGRAMME"
+      [ -w "$ziel_ordner" ] || { ziel_ordner="$HOME/Applications"; mkdir -p "$ziel_ordner"; }
+      if [ -d "$tmp/SwiftBar.app" ]; then
+        mv "$tmp/SwiftBar.app" "$ziel_ordner/"
+        ok "SwiftBar installiert: $ziel_ordner/SwiftBar.app"
+      else
+        hinweis "Das Herunterladen hat nicht geklappt — SwiftBar gibt es auch auf https://swiftbar.app"
+      fi
+      rm -rf "$tmp"
+    else
+      hinweis "Die SwiftBar-Seite war nicht erreichbar — später erneut versuchen oder https://swiftbar.app"
+    fi
+  fi
+fi
+
+# SwiftBar da, aber noch kein Plugin-Ordner? Dann ~/SwiftBar anlegen und eintragen.
+if app="$(swiftbar_app)" && [ -z "${ZEIT_SWIFTBAR_PLUGINS:-}" ] \
+   && [ -z "$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)" ]; then
+  mkdir -p "$HOME/SwiftBar"
+  defaults write com.ameba.SwiftBar PluginDirectory "$HOME/SwiftBar"
+  ok "Plugin-Ordner für SwiftBar: ~/SwiftBar"
+  # Läuft SwiftBar schon, muss es neu starten, um den Ordner zu übernehmen
+  osascript -e 'quit app "SwiftBar"' >/dev/null 2>&1 || true
+  sleep 1
+fi
+
+if app="$(swiftbar_app)"; then
   # ZEIT_SWIFTBAR_PLUGINS: anderer Plugin-Ordner (nur für Tests)
   plugins="${ZEIT_SWIFTBAR_PLUGINS:-$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)}"
   plugins="${plugins/#\~/$HOME}"
@@ -111,15 +187,15 @@ if [ -d "/Applications/SwiftBar.app" ] || [ -d "$HOME/Applications/SwiftBar.app"
       ln -sf "$ZIEL/swiftbar/zeit.15s.py" "$plugins/zeit.15s.py"
       ok "Plugin verknüpft: $plugins/zeit.15s.py"
     fi
+    # SwiftBar starten (falls es noch nicht läuft) und das Menü neu laden
+    [ -z "${ZEIT_SWIFTBAR_PLUGINS:-}" ] && { pgrep -x SwiftBar >/dev/null || open -a "$app"; }
     open -g "swiftbar://refreshallplugins" 2>/dev/null || true
   else
     hinweis "SwiftBar ist installiert, hat aber noch keinen Plugin-Ordner."
     hinweis "Öffne SwiftBar einmal, wähle einen Ordner (z. B. ~/SwiftBar) und starte dieses Skript erneut."
   fi
 else
-  hinweis "Optional: Für zeit in der Menüleiste SwiftBar installieren —"
-  hinweis "  brew install --cask swiftbar   (oder https://swiftbar.app)"
-  hinweis "danach dieses Skript erneut starten."
+  hinweis "Ohne SwiftBar — zeit läuft im Terminal. Für die Menüleiste später dieses Skript erneut starten."
 fi
 
 # --- Fertig -------------------------------------------------------------------
