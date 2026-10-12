@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Persönliche Daten gehören nie ins Repo — sie liegen in ~/.config/zeit/.
+# (Falls eine alte Version sie noch hier abgelegt hat:)
+projekte.md
+projekte.md.*
+Zeiterfassung.md

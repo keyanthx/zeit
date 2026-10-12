@@ -1,0 +1,48 @@
+<!doctype html>
+<!--
+  gui.html — die grafische Oberfläche von zeit (Popup unter dem Menüleisten-
+  Symbol und Fenster). Aussehen: gui.css, Verhalten: gui.js.
+
+  webterm.py setzt beim Ausliefern ein:
+    __KENNWORT__  das Kennwort für den lokalen Dienst
+    __PORT__      dessen Port
+    __FENSTER__   true im eigenen Fenster, false im Popup
+  Im Popup ist das eine lokale Datei, in die gui.css und gui.js direkt
+  hineinkopiert werden (SwiftBar zeigt dort nur lokale Dateien an).
+-->
+<html lang="de"><head><meta charset="utf-8"><title>zeit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/web/gui.css">
+</head>
+<body>
+<header>
+  <div class="kopf">
+    <span class="marke">zeit</span>
+    <span id="heute" class="leise"></span>
+    <span class="luecke"></span>
+    <button class="symbol" id="k_fenster" title="Als Fenster öffnen">⧉</button>
+    <button class="symbol" id="k_einstellungen" title="Einstellungen (⌘,)">⚙︎</button>
+  </div>
+  <nav class="reiter" id="reiter">
+    <button data-reiter="timer">Timer</button>
+    <button data-reiter="kalender">Kalender</button>
+    <button data-reiter="statistik">Statistik</button>
+    <button data-reiter="eintraege">Einträge</button>
+  </nav>
+</header>
+
+<main>
+  <section id="r_timer" class="seite"></section>
+  <section id="r_kalender" class="seite rahmenseite"></section>
+  <section id="r_statistik" class="seite rahmenseite"></section>
+  <section id="r_eintraege" class="seite"></section>
+  <section id="r_einstellungen" class="seite"></section>
+</main>
+
+<!-- Blatt: ein Dialog, der von unten über die Oberfläche fährt -->
+<div id="schleier" class="schleier versteckt"><div id="blatt" class="blatt"></div></div>
+<div id="meldung" class="meldung versteckt"></div>
+
+<script>window.ZEIT = { kennwort: "__KENNWORT__", port: "__PORT__", fenster: __FENSTER__ };</script>
+<script src="/web/gui.js"></script>
+</body></html>

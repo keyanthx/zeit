@@ -1,0 +1,179 @@
+/*
+  gui.css — Aussehen der zeit-GUI.
+
+  Ziel: wie eine schlichte macOS-App. Die Farben sind Variablen („Tokens“) auf
+  :root; für den dunklen Modus werden sie unten überschrieben. So folgt die GUI
+  automatisch Hell/Dunkel des Systems. --akzent setzt gui.js aus den
+  Einstellungen (Akzentfarbe).
+*/
+
+:root {
+  --grund: #f5f5f7;          /* Hintergrund */
+  --karte: #ffffff;          /* Flächen */
+  --text: #1d1d1f;
+  --leise: #86868b;          /* Nebensächliches */
+  --linie: #e0e0e3;
+  --feld: #ffffff;           /* Eingabefelder */
+  --akzent: #0a84ff;
+  --auf-akzent: #ffffff;     /* Schrift auf der Akzentfarbe */
+  --warn: #c93400;
+  --warn-grund: #fff1e5;
+  --ok: #248a3d;
+  --schatten: 0 1px 2px rgba(0, 0, 0, .07), 0 0 0 .5px rgba(0, 0, 0, .05);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --grund: #1c1c1e; --karte: #2c2c2e; --text: #f2f2f7; --leise: #8e8e93;
+    --linie: #3a3a3c; --feld: #1c1c1e; --warn: #ff9f0a; --warn-grund: #3a2a12; --ok: #30d158;
+    --schatten: 0 0 0 .5px rgba(255, 255, 255, .08);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex; flex-direction: column;
+  background: var(--grund); color: var(--text);
+  font: 13px -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  -webkit-user-select: none; user-select: none; overflow: hidden;
+}
+input, textarea, select { -webkit-user-select: text; user-select: text; }
+.leise { color: var(--leise); }
+.versteckt { display: none !important; }
+.luecke { flex: 1; }
+
+/* ---------- Kopf mit Reitern -------------------------------------------- */
+header { padding: 10px 12px 8px; border-bottom: 1px solid var(--linie); flex: none; }
+.kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.marke { font-weight: 700; font-size: 14px; letter-spacing: .2px; }
+button.symbol {
+  border: 0; background: none; color: var(--leise); font-size: 16px; width: 28px; height: 26px;
+  border-radius: 6px; cursor: pointer;
+}
+button.symbol:hover { background: var(--linie); color: var(--text); }
+.reiter { display: flex; background: var(--linie); border-radius: 8px; padding: 2px; }
+.reiter button {
+  flex: 1; border: 0; background: none; color: var(--text); font: inherit;
+  padding: 4px 6px; border-radius: 6px; cursor: pointer; white-space: nowrap;
+}
+.reiter button.an { background: var(--karte); box-shadow: var(--schatten); font-weight: 600; }
+
+/* ---------- Inhalt -------------------------------------------------------- */
+main { flex: 1; position: relative; overflow: hidden; }
+.seite { position: absolute; inset: 0; overflow-y: auto; padding: 12px; display: none; }
+.seite.an { display: block; }
+.rahmenseite { padding: 0; }
+.rahmenseite iframe { border: 0; width: 100%; height: 100%; display: block; }
+
+.karte { background: var(--karte); border-radius: 10px; box-shadow: var(--schatten); padding: 14px; margin-bottom: 12px; }
+h2 { font-size: 12px; font-weight: 600; color: var(--leise); text-transform: uppercase;
+     letter-spacing: .4px; margin: 16px 2px 6px; }
+h2:first-child { margin-top: 2px; }
+
+/* ---------- Die große Anzeige --------------------------------------------- */
+.anzeige { text-align: center; padding: 18px 14px 16px; }
+.anzeige .was { font-size: 13px; color: var(--leise); }
+.anzeige .uhr {
+  font-size: 46px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: -1px;
+  margin: 2px 0 2px; line-height: 1.1;
+}
+.anzeige .uhr.ruhig { color: var(--leise); }
+.anzeige .wo { font-size: 14px; font-weight: 600; }
+.anzeige .zusatz { font-size: 12px; color: var(--leise); margin-top: 3px; }
+.balken { height: 4px; background: var(--linie); border-radius: 2px; margin: 12px 0 2px; overflow: hidden; }
+.balken div { height: 100%; background: var(--akzent); border-radius: 2px; transition: width 1s linear; }
+.hinweis { background: var(--warn-grund); color: var(--warn); border-radius: 8px; padding: 8px 10px;
+           margin: 10px 0 0; font-size: 12px; text-align: left; }
+
+/* ---------- Knöpfe -------------------------------------------------------- */
+.knoepfe { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
+button.k {
+  font: inherit; border: 1px solid var(--linie); background: var(--karte); color: var(--text);
+  padding: 6px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap;
+}
+button.k:hover { filter: brightness(.97); }
+button.k.haupt { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); font-weight: 600; }
+button.k.leise { background: none; border-color: transparent; color: var(--leise); }
+button.k.gefahr { color: #d70015; }
+button.k:disabled { opacity: .45; cursor: default; }
+button.k .taste { opacity: .55; font-size: 11px; margin-left: 4px; }
+.start-knoepfe { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; }
+@media (min-width: 480px) { .start-knoepfe { grid-template-columns: repeat(4, 1fr); } }
+.start-knoepfe button.k { padding: 8px 6px; }
+
+/* ---------- Formulare ------------------------------------------------------ */
+.feld { display: grid; grid-template-columns: 104px 1fr; align-items: center; gap: 8px; margin: 7px 0; }
+.feld > span:first-child { color: var(--leise); text-align: right; }
+input, select, textarea {
+  font: inherit; color: var(--text); background: var(--feld); border: 1px solid var(--linie);
+  border-radius: 6px; padding: 5px 7px; width: 100%; min-width: 0;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb, var(--akzent) 55%, transparent); outline-offset: 0; }
+input[type="checkbox"] { width: auto; }
+textarea { resize: vertical; min-height: 54px; }
+.zeile2 { display: flex; gap: 6px; align-items: center; }
+.zeile2 > * { flex: 1; }
+.zeile2 > .schmal { flex: none; }
+.fehler { color: #d70015; font-size: 12px; margin: 8px 0 0; white-space: pre-line; }
+.klein { font-size: 11.5px; color: var(--leise); }
+
+/* Segmente (z. B. 😄 😐 ☹️) */
+.segmente { display: flex; background: var(--linie); border-radius: 8px; padding: 2px; }
+.segmente button { flex: 1; border: 0; background: none; font: inherit; color: var(--text);
+                   padding: 5px 4px; border-radius: 6px; cursor: pointer; }
+.segmente button.an { background: var(--karte); box-shadow: var(--schatten); font-weight: 600; }
+
+/* Schalter (an/aus) */
+.schalter { position: relative; width: 34px; height: 20px; flex: none; }
+.schalter input { opacity: 0; width: 0; height: 0; position: absolute; }
+.schalter span { position: absolute; inset: 0; background: var(--linie); border-radius: 10px; cursor: pointer; transition: .15s; }
+.schalter span::after { content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px;
+                        border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: .15s; }
+.schalter input:checked + span { background: var(--akzent); }
+.schalter input:checked + span::after { transform: translateX(14px); }
+
+/* ---------- Listen --------------------------------------------------------- */
+.liste { background: var(--karte); border-radius: 10px; box-shadow: var(--schatten); overflow: hidden; margin-bottom: 12px; }
+.liste .eintrag { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-top: 1px solid var(--linie); }
+.liste .eintrag:first-child { border-top: 0; }
+.liste .eintrag.klickbar { cursor: pointer; }
+.liste .eintrag.klickbar:hover { background: color-mix(in srgb, var(--akzent) 8%, transparent); }
+.eintrag .haupt { flex: 1; min-width: 0; }
+.eintrag .titel { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eintrag .unter { font-size: 12px; color: var(--leise); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eintrag .zahl { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.eintrag .pfeil { color: var(--leise); }
+.leer { text-align: center; color: var(--leise); padding: 24px 12px; }
+.bahn { height: 6px; background: var(--linie); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.bahn div { height: 100%; background: var(--akzent); border-radius: 3px; }
+.zurueck { border: 0; background: none; color: var(--akzent); font: inherit; cursor: pointer; padding: 2px 0 10px; }
+.tag-kopf { font-size: 12px; font-weight: 600; color: var(--leise); padding: 8px 12px 4px; background: var(--grund); }
+
+/* ---------- Blatt (Dialog) ------------------------------------------------- */
+.schleier { position: fixed; inset: 0; background: rgba(0, 0, 0, .28); z-index: 20;
+            display: flex; align-items: flex-end; justify-content: center; }
+.blatt { background: var(--grund); width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto;
+         border-radius: 12px 12px 0 0; padding: 16px 16px 14px; box-shadow: 0 -6px 30px rgba(0,0,0,.25);
+         animation: hoch .16s ease-out; }
+@media (min-width: 600px) { .schleier { align-items: center; } .blatt { border-radius: 12px; } }
+@keyframes hoch { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.blatt h3 { margin: 0 0 4px; font-size: 15px; }
+.blatt .unterzeile { color: var(--leise); margin-bottom: 10px; white-space: pre-line; }
+.blatt .fuss { display: flex; gap: 6px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+.blatt .fuss .links { margin-right: auto; }
+.bericht { font: 12px ui-monospace, "SF Mono", Menlo, monospace; white-space: pre-wrap;
+           background: var(--karte); border-radius: 8px; padding: 10px 12px; box-shadow: var(--schatten); }
+.frage-text { white-space: pre-line; margin: 4px 0 6px; }
+
+/* Termine im Nachtragen */
+.termin { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; padding: 8px 12px; border-top: 1px solid var(--linie); }
+.termin:first-child { border-top: 0; }
+.termin .zeile2 { grid-column: 1 / -1; }
+.termin.fertig { opacity: .55; }
+
+/* ---------- Meldung (kurz unten eingeblendet) ------------------------------ */
+.meldung { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 40;
+           background: var(--text); color: var(--grund); padding: 8px 14px; border-radius: 8px;
+           font-weight: 600; max-width: calc(100% - 24px); text-align: center; white-space: pre-line;
+           box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+.meldung.fehler-meldung { background: #d70015; color: #fff; }
